@@ -6,14 +6,13 @@ module.exports = client => {
         if (!config.logChannel) return;
 
         if (oldM.roles.cache.size !== newM.roles.cache.size) {
-            const embed = new EmbedBuilder()
+            const log = new EmbedBuilder()
                 .setTitle("🎭 Role Updated")
                 .setDescription(`${newM.user.tag} role update`)
-                .setColor("Blue")
-                .setTimestamp();
+                .setTimestamp()
+                .setColor("Blue");
 
-            const ch = client.channels.cache.get(config.logChannel);
-            if (ch) ch.send({ embeds: [embed] });
+            client.channels.cache.get(config.logChannel)?.send({ embeds: [log] });
         }
     });
 };
