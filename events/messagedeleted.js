@@ -2,19 +2,25 @@ const { EmbedBuilder } = require("discord.js");
 const config = require("../config.json");
 
 module.exports = client => {
-    client.on("messageDelete", msg => {
+    client.on("messageDelete", async msg => {
         if (!msg.guild || !config.logChannel) return;
 
-        const log = new EmbedBuilder()
+        if (msg.partial) {
+            try { msg = await msg.fetch(); }
+            catch { return; }
+        }
+
+        const embed = new EmbedBuilder()
             .setTitle("🗑️ Message Deleted")
             .addFields(
-                { name: "Author", value: msg.author?.tag || "??" },
+                { name: "Author", value: msg.author?.tag || "Unknown" },
                 { name: "Channel", value: `${msg.channel}` },
                 { name: "Content", value: msg.content || "No content" }
             )
-            .setTimestamp()
-            .setColor("Red");
+            .setColor("Red")
+            .setTimestamp();
 
-        client.channels.cache.get(config.logChannel)?.send({ embeds: [log] });
+        const logChannel = client.channels.cache.get(config.logChannel);
+        if (logChannel) logChannel.send({ embeds: [embed] });
     });
 };
