@@ -6,7 +6,7 @@ module.exports = client => {
         if (!config.logChannel) return;
 
         if (oldU.username !== newU.username) {
-            const log = new EmbedBuilder()
+            const embed = new EmbedBuilder()
                 .setTitle("📝 Username Changed")
                 .addFields(
                     { name: "Old", value: oldU.username },
@@ -15,8 +15,8 @@ module.exports = client => {
                 .setColor("Yellow")
                 .setTimestamp();
 
-            client.channels.cache.get(config.logChannel)
-                ?.send({ embeds: [log] });
+            const ch = client.channels.cache.get(config.logChannel);
+            if (ch) ch.send({ embeds: [embed] });
         }
     });
 };
