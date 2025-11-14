@@ -24,11 +24,11 @@ for (const file of commandFiles) {
     client.commands.set(cmd.data.name, cmd);
 }
 
-// تحميل الأحداث
-const eventsPath = path.join(__dirname, "events");
+// تحميل الأحداث (تصليح هنا)
+const eventsPath = path.join(__dirname, "event");
 const eventFiles = fs.readdirSync(eventsPath);
 for (const file of eventFiles) {
-    require(`./events/${file}`)(client);
+    require(`./event/${file}`)(client);
 }
 
 client.login(config.token);
