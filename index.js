@@ -1,34 +1,34 @@
-const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
-const fs = require('fs');
-const path = require('path');
-const config = require('./config.json');
+const fs = require("fs");
+const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
+const config = require("./config.json");
 
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
-        GatewayIntentBits.DirectMessages
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildVoiceStates
     ],
     partials: [Partials.Channel]
 });
 
 client.commands = new Collection();
 
-// تحميل الأوامر
-const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs.readdirSync(commandsPath);
-for (const file of commandFiles) {
-    const cmd = require(`./commands/${file}`);
-    client.commands.set(cmd.data.name, cmd);
-}
+// Load commands
+fs.readdirSync("./commands").forEach(file => {
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
+});
 
-// تحميل الأحداث (تصليح هنا)
-const eventsPath = path.join(__dirname, "event");
-const eventFiles = fs.readdirSync(eventsPath);
-for (const file of eventFiles) {
-    require(`./event/${file}`)(client);
-}
+// Load events
+fs.readdirSync("./events").forEach(file => {
+    const event = require(`./events/${file}`);
+    if (event.once) {
+        client.once(event.name, (...args) => event.execute(...args, client));
+    } else {
+        client.on(event.name, (...args) => event.execute(...args, client));
+    }
+});
 
 client.login(config.token);
