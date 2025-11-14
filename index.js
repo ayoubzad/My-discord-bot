@@ -1,34 +1,36 @@
-const fs = require("fs");
-const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
-const config = require("./config.json");
+const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
+
+require("dotenv").config(); // مهم جداً ليستعمل Render المتغيرات
 
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildVoiceStates
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.MessageContent
     ],
     partials: [Partials.Channel]
 });
 
 client.commands = new Collection();
 
-// Load commands
-fs.readdirSync("./commands").forEach(file => {
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
-});
+// تحميل الأوامر
+const commandsPath = path.join(__dirname, "commands");
+const commandFiles = fs.readdirSync(commandsPath);
+for (const file of commandFiles) {
+    const cmd = require(`./commands/${file}`);
+    client.commands.set(cmd.data.name, cmd);
+}
 
-// Load events
-fs.readdirSync("./events").forEach(file => {
-    const event = require(`./events/${file}`);
-    if (event.once) {
-        client.once(event.name, (...args) => event.execute(...args, client));
-    } else {
-        client.on(event.name, (...args) => event.execute(...args, client));
-    }
-});
+// تحميل الأحداث
+const eventsPath = path.join(__dirname, "events");
+const eventFiles = fs.readdirSync(eventsPath);
+for (const file of eventFiles) {
+    require(`./events/${file}`)(client);
+}
 
-client.login(config.token);
+// تسجيل دخول البوت من ENV
+client.login(process.env.TOKEN);
