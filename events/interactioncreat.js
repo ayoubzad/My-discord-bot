@@ -4,5 +4,10 @@ module.exports = async (client, interaction) => {
     const command = client.commands.get(interaction.commandName);
     if (!command) return;
 
-    await command.execute(interaction);
+    try {
+        await command.execute(interaction);
+    } catch (err) {
+        console.error(err);
+        interaction.reply({ content: "❌ حدث خطأ أثناء تنفيذ الأمر.", ephemeral: true });
+    }
 };
